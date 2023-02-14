@@ -87,6 +87,9 @@ func deploymentCommand(_ *cobra.Command, _ []string) error {
 	}
 
 	t := template.Must(template.New("deploymentTemplate").Parse(text))
+	if varIntMinReplicas > varIntReplicas {
+		varIntMinReplicas = varIntReplicas
+	}
 	err = t.Execute(out, Deployment{
 		Name:            varStringName,
 		Namespace:       varStringNamespace,

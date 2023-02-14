@@ -13,7 +13,8 @@ var funcMap = template.FuncMap{
 }
 
 const (
-	apiFileContent = `import 'dart:io';
+	apiFileContent = `// ignore_for_file: avoid_print
+import 'dart:io';
 import 'dart:convert';
 import '../vars/kv.dart';
 import '../vars/vars.dart';
@@ -37,7 +38,7 @@ Future apiPost(String path, dynamic data,
 Future apiGet(String path,
     {Map<String, String> header,
     Function(Map<String, dynamic>) ok,
-    Function(String) fail,
+    Function(int, String) fail,
     Function eventually}) async {
   await _apiRequest('GET', path, null,
       header: header, ok: ok, fail: fail, eventually: eventually);
@@ -46,16 +47,17 @@ Future apiGet(String path,
 Future _apiRequest(String method, String path, dynamic data,
     {Map<String, String> header,
     Function(Map<String, dynamic>) ok,
-    Function(String) fail,
+    Function(int, String) fail,
     Function eventually}) async {
   var tokens = await getTokens();
   try {
     var client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 3);
     HttpClientRequest r;
     if (method == 'POST') {
-      r = await client.postUrl(Uri.parse('https://' + serverHost + path));
+      r = await client.postUrl(Uri.parse(serverHost + path));
     } else {
-      r = await client.getUrl(Uri.parse('https://' + serverHost + path));
+      r = await client.getUrl(Uri.parse(serverHost + path));
     }
 
     r.headers.set('Content-Type', 'application/json; charset=utf-8');
@@ -80,27 +82,28 @@ Future _apiRequest(String method, String path, dynamic data,
     print('-- response --');
     print('$body \n');
     if (rp.statusCode == 404) {
-      if (fail != null) fail('404 not found');
+      if (fail != null) fail(404, '404 not found');
     } else {
       Map<String, dynamic> base = jsonDecode(body);
       if (rp.statusCode == 200) {
-        if (base['code'] != 0) {
-          if (fail != null) fail(base['desc']);
+        if (base.containsKey('errorCode')) {
+          if (fail != null) fail(base['errorCode'], base['errorMsg']);
         } else {
-          if (ok != null) ok(base['data']);
+          if (ok != null) ok(base);
         }
-      } else if (base['code'] != 0) {
-        if (fail != null) fail(base['desc']);
+      } else if (base.containsKey('errorCode')) {
+        if (fail != null) fail(base['errorCode'], base['errorMsg']);
       }
     }
   } catch (e) {
-    if (fail != null) fail(e.toString());
+    if (fail != null) fail(500, e.toString());
   }
   if (eventually != null) eventually();
 }
 `
 
-	apiFileContentV2 = `import 'dart:io';
+	apiFileContentV2 = `// ignore_for_file: avoid_print
+	import 'dart:io';
 	import 'dart:convert';
 	import '../vars/kv.dart';
 	import '../vars/vars.dart';
@@ -114,7 +117,7 @@ Future _apiRequest(String method, String path, dynamic data,
 	Future apiPost(String path, dynamic data,
 			{Map<String, String>? header,
 			Function(Map<String, dynamic>)? ok,
-			Function(String)? fail,
+			Function(int, String)? fail,
 			Function? eventually}) async {
 		await _apiRequest('POST', path, data,
 				header: header, ok: ok, fail: fail, eventually: eventually);
@@ -128,7 +131,7 @@ Future _apiRequest(String method, String path, dynamic data,
 	Future apiGet(String path,
 			{Map<String, String>? header,
 			Function(Map<String, dynamic>)? ok,
-			Function(String)? fail,
+			Function(int, String)? fail,
 			Function? eventually}) async {
 		await _apiRequest('GET', path, null,
 				header: header, ok: ok, fail: fail, eventually: eventually);
@@ -137,16 +140,17 @@ Future _apiRequest(String method, String path, dynamic data,
 	Future _apiRequest(String method, String path, dynamic data,
 			{Map<String, String>? header,
 			Function(Map<String, dynamic>)? ok,
-			Function(String)? fail,
+			Function(int, String)? fail,
 			Function? eventually}) async {
 		var tokens = await getTokens();
 		try {
 			var client = HttpClient();
+			client.connectionTimeout = const Duration(seconds: 3);
 			HttpClientRequest r;
 			if (method == 'POST') {
-				r = await client.postUrl(Uri.parse('https://' + serverHost + path));
+				r = await client.postUrl(Uri.parse(serverHost + path));
 			} else {
-				r = await client.getUrl(Uri.parse('https://' + serverHost + path));
+				r = await client.getUrl(Uri.parse(serverHost + path));
 			}
 
 			r.headers.set('Content-Type', 'application/json; charset=utf-8');
@@ -171,21 +175,21 @@ Future _apiRequest(String method, String path, dynamic data,
 			print('-- response --');
 			print('$body \n');
 			if (rp.statusCode == 404) {
-				if (fail != null) fail('404 not found');
+				if (fail != null) fail(404, '404 not found');
 			} else {
 				Map<String, dynamic> base = jsonDecode(body);
 				if (rp.statusCode == 200) {
-					if (base['code'] != 0) {
-						if (fail != null) fail(base['desc']);
+					if (base.containsKey('errorCode')) {
+						if (fail != null) fail(base['errorCode'], base['errorMsg']);
 					} else {
-						if (ok != null) ok(base['data']);
+						if (ok != null) ok(base);
 					}
-				} else if (base['code'] != 0) {
-					if (fail != null) fail(base['desc']);
+				} else if (base.containsKey('errorCode')) {
+					if (fail != null) fail(base['errorCode'], base['errorMsg']);
 				}
 			}
 		} catch (e) {
-			if (fail != null) fail(e.toString());
+			if (fail != null) fail(500, e.toString());
 		}
 		if (eventually != null) eventually();
 	}`

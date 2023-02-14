@@ -35,7 +35,7 @@ func DartCommand(_ *cobra.Command, _ []string) error {
 	}
 	if len(hostname) == 0 {
 		fmt.Println("you could use '-hostname' flag to specify your server hostname")
-		hostname = "go-zero.dev"
+		hostname = "https://go-zero.dev"
 	}
 
 	api, err := parser.Parse(apiFile)

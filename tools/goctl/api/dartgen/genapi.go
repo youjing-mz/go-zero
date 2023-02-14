@@ -40,7 +40,7 @@ import '../data/{{with .Info}}{{getBaseName .Title}}{{end}}.dart';
 /// response: {{with .ResponseType}}{{.Name}}{{end}}
 Future {{pathToFuncName .Path}}( {{if ne .Method "get"}}{{with .RequestType}}{{.Name}} request,{{end}}{{end}}
     {Function({{with .ResponseType}}{{.Name}}{{end}})? ok,
-    Function(String)? fail,
+    Function(int, String)? fail,
     Function? eventually}) async {
   await api{{if eq .Method "get"}}Get{{else}}Post{{end}}('{{.Path}}',{{if ne .Method "get"}}request,{{end}}
   	 ok: (data) {
