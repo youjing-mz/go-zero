@@ -1,3 +1,5 @@
-Name: {{.serviceName}}
+Name: {{.serviceName}}-api
 Host: {{.host}}
-Port: {{.port}}
+Port: ${{"{"}}{{.serviceName}}-api-port{{"}"}}
+Mode: ${env-mode}
+
