@@ -24,3 +24,18 @@ func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, {{
 		return nil, err
 	}{{end}}
 }
+
+func (m *default{{.upperStartCamelObject}}Model) FindAll(ctx context.Context) ([]{{.upperStartCamelObject}}, error) {
+	query := fmt.Sprintf("select %s from %s", {{.lowerStartCamelObject}}Rows, m.table)
+	var resp []{{.upperStartCamelObject}}
+	err := m.QueryRowNoCacheCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return resp, nil
+	case sqlx.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+

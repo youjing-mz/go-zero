@@ -1,7 +1,11 @@
 package {{.pkgName}}
 
 import (
+	"github.com/jinzhu/copier"
+	"github.com/motionz-tech/flowz-srv/common/ctxdata"
 	{{.imports}}
+	"github.com/pkg/errors"
+	"github.com/motionz-tech/flowz-srv/service/{{.serviceName}}/rpc/{{.serviceName}}"
 )
 
 type {{.logic}} struct {
@@ -19,7 +23,29 @@ func New{{.logic}}(ctx context.Context, svcCtx *svc.ServiceContext) *{{.logic}} 
 }
 
 func (l *{{.logic}}) {{.function}}({{.request}}) {{.responseType}} {
-	// todo: add your logic here and delete this line
+	userId, err := ctxdata.GetUidFromCtx(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var rpcReq {{.serviceName}}.{{.typeName}}Req
+	err = copier.Copy(&rpcReq, req)
+	if err != nil {
+		return nil, errors.Wrapf(err, "copier.Copy req failed")
+	}
+
+	rpcReq.Uid = userId
+
+	rpcRsp, err := l.svcCtx.{{.upperStartCamelServiceName}}Rpc.{{.typeName}}(l.ctx, &rpcReq)
+	if err != nil {
+		return nil, errors.Wrapf(err, "rpc failed")
+	}
+
+	var rsp types.{{.typeName}}Rsp
+	err = copier.Copy(&rsp, rpcRsp)
+	if err != nil {
+		return nil, errors.Wrapf(err, "copier.Copy rsp failed")
+	}
 
 	{{.returnString}}
 }

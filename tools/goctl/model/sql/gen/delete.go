@@ -38,6 +38,7 @@ func genDelete(table Table, withCache, postgreSql bool) (string, string, error) 
 			"withCache":                 withCache,
 			"containsIndexCache":        table.ContainsUniqueCacheKey,
 			"lowerStartCamelPrimaryKey": util.EscapeGolangKeyword(stringx.From(table.PrimaryKey.Name.ToCamel()).Untitle()),
+			"upperStartCamelPrimaryKey": table.PrimaryKey.Name.ToCamel(),
 			"dataType":                  table.PrimaryKey.DataType,
 			"keys":                      strings.Join(keys, "\n"),
 			"originalPrimaryKey":        wrapWithRawString(table.PrimaryKey.Name.Source(), postgreSql),
