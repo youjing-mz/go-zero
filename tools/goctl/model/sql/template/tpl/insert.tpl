@@ -47,6 +47,12 @@ func (m *default{{.upperStartCamelObject}}Model) InsertBatch(ctx context.Context
 	if dataCount == 0 {
 		return nil
 	}
+	var allKeys []string
+    for _, data := range dataList {
+        {{.keys}}
+        allKeys = append(allKeys, {{.keyValues}})
+    }
+
     ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("insert into %s (%s) values %s", m.table, {{.lowerStartCamelObject}}RowsExpectAutoSet, m.generateInsertBatchSQLStatements(dataCount))
 		var params []interface{}
@@ -54,7 +60,7 @@ func (m *default{{.upperStartCamelObject}}Model) InsertBatch(ctx context.Context
 			params = append(params, {{.expressionValues}})
 		}
 		return conn.ExecCtx(ctx, query, params...)
-	})
+	},allKeys...)
 	if err != nil {
 		return err
 	}
