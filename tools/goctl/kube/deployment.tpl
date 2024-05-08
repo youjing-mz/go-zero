@@ -20,6 +20,73 @@ spec:
       containers:
       - name: {{.Name}}
         image: {{.Image}}
+        env:
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: mysql-password
+                optional: true
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: redis-password
+                optional: true
+          - name: JWT_ACCESS_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: jwt-access-secret
+                optional: true
+          - name: JWT_ADMIN_ACCESS_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: jwt-admin-access-secret
+                optional: true
+          - name: TX_COS_SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: tx-cos-secretkey
+                optional: true
+          - name: TX_LOG_SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: tx-log-secretkey
+                optional: true
+          - name: STOREKIT_SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: storekit-secretkey
+                optional: true
+          - name: PULSAR_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: pulsar-auth-token
+                optional: true
+          - name: QINIU_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: qiniu-access-key
+                optional: true
+          - name: QINIU_SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: qiniu-secretkey
+                optional: true
+          - name: PUSHKIT_SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-${env-mode}
+                key: pushKit-secretkey
+                optional: true
         {{if .ImagePullPolicy}}imagePullPolicy: {{.ImagePullPolicy}}
         {{end}}ports:
         - containerPort: {{.Port}}
