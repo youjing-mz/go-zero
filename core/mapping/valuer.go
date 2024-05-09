@@ -26,15 +26,15 @@ type (
 		parent valuerWithParent
 	}
 
-	// mapValuer is a type for map to meet the Valuer interface.
+	// mapValuer is a type for the map to meet the Valuer interface.
 	mapValuer map[string]any
-	// simpleValuer is a type to get value from current node.
+	// simpleValuer is a type to get value from the current node.
 	simpleValuer node
 	// recursiveValuer is a type to get the value recursively from current and parent nodes.
 	recursiveValuer node
 )
 
-// Value gets the value assciated with the given key from mv.
+// Value gets the value associated with the given key from mv.
 func (mv mapValuer) Value(key string) (any, bool) {
 	v, ok := mv[key]
 	return v, ok

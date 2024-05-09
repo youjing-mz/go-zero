@@ -1,6 +1,8 @@
 package zrpc
 
 import (
+	"time"
+
 	"github.com/zeromicro/go-zero/core/discov"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -13,6 +15,23 @@ type (
 	ClientMiddlewaresConf = internal.ClientMiddlewaresConf
 	// ServerMiddlewaresConf defines whether to use server middlewares.
 	ServerMiddlewaresConf = internal.ServerMiddlewaresConf
+	// StatConf defines the stat config.
+	StatConf = internal.StatConf
+	// MethodTimeoutConf defines specified timeout for gRPC method.
+	MethodTimeoutConf = internal.MethodTimeoutConf
+
+	// A RpcClientConf is a rpc client config.
+	RpcClientConf struct {
+		Etcd          discov.EtcdConf `json:",optional,inherit"`
+		Endpoints     []string        `json:",optional"`
+		Target        string          `json:",optional"`
+		App           string          `json:",optional"`
+		Token         string          `json:",optional"`
+		NonBlock      bool            `json:",optional"`
+		Timeout       int64           `json:",default=2000"`
+		KeepaliveTime time.Duration   `json:",optional"`
+		Middlewares   ClientMiddlewaresConf
+	}
 
 	// A RpcServerConf is a rpc server config.
 	RpcServerConf struct {
@@ -24,22 +43,12 @@ type (
 		StrictControl bool               `json:",optional"`
 		// setting 0 means no timeout
 		Timeout      int64 `json:",default=2000"`
-		CpuThreshold int64 `json:",default=900,range=[0:1000]"`
+		CpuThreshold int64 `json:",default=900,range=[0:1000)"`
 		// grpc health check switch
 		Health      bool `json:",default=true"`
 		Middlewares ServerMiddlewaresConf
-	}
-
-	// A RpcClientConf is a rpc client config.
-	RpcClientConf struct {
-		Etcd        discov.EtcdConf `json:",optional,inherit"`
-		Endpoints   []string        `json:",optional"`
-		Target      string          `json:",optional"`
-		App         string          `json:",optional"`
-		Token       string          `json:",optional"`
-		NonBlock    bool            `json:",optional"`
-		Timeout     int64           `json:",default=2000"`
-		Middlewares ClientMiddlewaresConf
+		// setting specified timeout for gRPC method
+		MethodTimeouts []MethodTimeoutConf `json:",optional"`
 	}
 )
 

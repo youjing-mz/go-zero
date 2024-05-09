@@ -4,11 +4,12 @@ import (
 	"context"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/zeromicro/go-zero/core/proc"
 	"github.com/zeromicro/go-zero/core/stat"
-	"github.com/zeromicro/go-zero/zrpc/internal/mock"
+	"github.com/zeromicro/go-zero/internal/mock"
 	"google.golang.org/grpc"
 )
 
@@ -40,13 +41,13 @@ func TestRpcServer(t *testing.T) {
 	}()
 
 	wg.Wait()
+	time.Sleep(100 * time.Millisecond)
 
-	proc.WrapUp()
 	lock.Lock()
 	grpcServer.GracefulStop()
 	lock.Unlock()
 
-	proc.WrapUp()
+	proc.Shutdown()
 	wgDone.Wait()
 }
 

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"path"
+	"runtime/debug"
 	"sync"
 	"sync/atomic"
 
@@ -253,11 +254,10 @@ func (n nopWriter) Stack(_ any) {
 func (n nopWriter) Stat(_ any, _ ...LogField) {
 }
 
-func buildPlainFields(fields ...LogField) []string {
-	var items []string
-
-	for _, field := range fields {
-		items = append(items, fmt.Sprintf("%s=%+v", field.Key, field.Value))
+func buildPlainFields(fields logEntry) []string {
+	items := make([]string, 0, len(fields))
+	for k, v := range fields {
+		items = append(items, fmt.Sprintf("%s=%+v", k, v))
 	}
 
 	return items
@@ -288,15 +288,17 @@ func output(writer io.Writer, level string, val any, fields ...LogField) {
 	}
 
 	fields = combineGlobalFields(fields)
+	// +3 for timestamp, level and content
+	entry := make(logEntry, len(fields)+3)
+	for _, field := range fields {
+		entry[field.Key] = field.Value
+	}
 
 	switch atomic.LoadUint32(&encoding) {
 	case plainEncodingType:
-		writePlainAny(writer, level, val, buildPlainFields(fields...)...)
+		plainFields := buildPlainFields(entry)
+		writePlainAny(writer, level, val, plainFields...)
 	default:
-		entry := make(logEntry)
-		for _, field := range fields {
-			entry[field.Key] = field.Value
-		}
 		entry[timestampKey] = getTimestamp()
 		entry[levelKey] = level
 		entry[contentKey] = val
@@ -332,11 +334,13 @@ func wrapLevelWithColor(level string) string {
 
 func writeJson(writer io.Writer, info any) {
 	if content, err := json.Marshal(info); err != nil {
-		log.Println(err.Error())
+		log.Printf("err: %s\n\n%s", err.Error(), debug.Stack())
 	} else if writer == nil {
 		log.Println(string(content))
 	} else {
-		writer.Write(append(content, '\n'))
+		if _, err := writer.Write(append(content, '\n')); err != nil {
+			log.Println(err.Error())
+		}
 	}
 }
 
@@ -384,7 +388,7 @@ func writePlainValue(writer io.Writer, level string, val any, fields ...string) 
 	buf.WriteString(level)
 	buf.WriteByte(plainEncodingSep)
 	if err := json.NewEncoder(&buf).Encode(val); err != nil {
-		log.Println(err.Error())
+		log.Printf("err: %s\n\n%s", err.Error(), debug.Stack())
 		return
 	}
 

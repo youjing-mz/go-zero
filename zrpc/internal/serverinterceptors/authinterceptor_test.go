@@ -45,9 +45,7 @@ func TestStreamAuthorizeInterceptor(t *testing.T) {
 		},
 	}
 
-	store, clean, err := redistest.CreateRedis()
-	assert.Nil(t, err)
-	defer clean()
+	store := redistest.CreateRedis(t)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -111,9 +109,7 @@ func TestUnaryAuthorizeInterceptor(t *testing.T) {
 		},
 	}
 
-	store, clean, err := redistest.CreateRedis()
-	assert.Nil(t, err)
-	defer clean()
+	store := redistest.CreateRedis(t)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -173,25 +169,25 @@ type mockedStream struct {
 	ctx context.Context
 }
 
-func (m mockedStream) SetHeader(md metadata.MD) error {
+func (m mockedStream) SetHeader(_ metadata.MD) error {
 	return nil
 }
 
-func (m mockedStream) SendHeader(md metadata.MD) error {
+func (m mockedStream) SendHeader(_ metadata.MD) error {
 	return nil
 }
 
-func (m mockedStream) SetTrailer(md metadata.MD) {
+func (m mockedStream) SetTrailer(_ metadata.MD) {
 }
 
 func (m mockedStream) Context() context.Context {
 	return m.ctx
 }
 
-func (m mockedStream) SendMsg(v any) error {
+func (m mockedStream) SendMsg(_ any) error {
 	return nil
 }
 
-func (m mockedStream) RecvMsg(v any) error {
+func (m mockedStream) RecvMsg(_ any) error {
 	return nil
 }

@@ -76,7 +76,7 @@ func (s *rpcServer) Start(register RegisterFn) error {
 
 	// we need to make sure all others are wrapped up,
 	// so we do graceful stop at shutdown phase instead of wrap up phase
-	waitForCalled := proc.AddWrapUpListener(func() {
+	waitForCalled := proc.AddShutdownListener(func() {
 		if s.health != nil {
 			s.health.Shutdown()
 		}
@@ -113,7 +113,8 @@ func (s *rpcServer) buildUnaryInterceptors() []grpc.UnaryServerInterceptor {
 		interceptors = append(interceptors, serverinterceptors.UnaryRecoverInterceptor)
 	}
 	if s.middlewares.Stat {
-		interceptors = append(interceptors, serverinterceptors.UnaryStatInterceptor(s.metrics))
+		interceptors = append(interceptors,
+			serverinterceptors.UnaryStatInterceptor(s.metrics, s.middlewares.StatConf))
 	}
 	if s.middlewares.Prometheus {
 		interceptors = append(interceptors, serverinterceptors.UnaryPrometheusInterceptor)

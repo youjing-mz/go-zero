@@ -24,6 +24,10 @@ var (
 	_    Writer = (*mockWriter)(nil)
 )
 
+func init() {
+	ExitOnFatal.Set(false)
+}
+
 type mockWriter struct {
 	lock    sync.Mutex
 	builder strings.Builder
@@ -206,6 +210,12 @@ func TestFileLineConsoleMode(t *testing.T) {
 	file, line = getFileLine()
 	Errorf("anything %s", "format")
 	assert.True(t, w.Contains(fmt.Sprintf("%s:%d", file, line+1)))
+}
+
+func TestMust(t *testing.T) {
+	assert.Panics(t, func() {
+		Must(errors.New("foo"))
+	})
 }
 
 func TestStructedLogAlert(t *testing.T) {
@@ -560,7 +570,7 @@ func TestErrorfWithWrappedError(t *testing.T) {
 	old := writer.Swap(w)
 	defer writer.Store(old)
 
-	Errorf("hello %w", errors.New(message))
+	Errorf("hello %s", errors.New(message))
 	assert.True(t, strings.Contains(w.String(), "hello there"))
 }
 
@@ -574,26 +584,38 @@ func TestSetup(t *testing.T) {
 		atomic.StoreUint32(&encoding, jsonEncodingType)
 	}()
 
+	setupOnce = sync.Once{}
+	MustSetup(LogConf{
+		ServiceName: "any",
+		Mode:        "console",
+		Encoding:    "json",
+		TimeFormat:  timeFormat,
+	})
+	setupOnce = sync.Once{}
 	MustSetup(LogConf{
 		ServiceName: "any",
 		Mode:        "console",
 		TimeFormat:  timeFormat,
 	})
+	setupOnce = sync.Once{}
 	MustSetup(LogConf{
 		ServiceName: "any",
 		Mode:        "file",
 		Path:        os.TempDir(),
 	})
+	setupOnce = sync.Once{}
 	MustSetup(LogConf{
 		ServiceName: "any",
 		Mode:        "volume",
 		Path:        os.TempDir(),
 	})
+	setupOnce = sync.Once{}
 	MustSetup(LogConf{
 		ServiceName: "any",
 		Mode:        "console",
 		TimeFormat:  timeFormat,
 	})
+	setupOnce = sync.Once{}
 	MustSetup(LogConf{
 		ServiceName: "any",
 		Mode:        "console",
@@ -644,6 +666,7 @@ func TestDisable(t *testing.T) {
 	WithMaxSize(1024)(&opt)
 	assert.Nil(t, Close())
 	assert.Nil(t, Close())
+	assert.Equal(t, uint32(disableLevel), atomic.LoadUint32(&logLevel))
 }
 
 func TestDisableStat(t *testing.T) {
@@ -658,7 +681,7 @@ func TestDisableStat(t *testing.T) {
 }
 
 func TestSetWriter(t *testing.T) {
-	atomic.StoreUint32(&disableLog, 0)
+	atomic.StoreUint32(&logLevel, 0)
 	Reset()
 	SetWriter(nopWriter{})
 	assert.NotNil(t, writer.Load())
