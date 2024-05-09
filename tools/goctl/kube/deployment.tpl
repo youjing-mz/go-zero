@@ -137,7 +137,7 @@ spec:
 
 ---
 
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{.Name}}-hpa-c
@@ -161,7 +161,7 @@ spec:
 
 ---
 
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{.Name}}-hpa-m
