@@ -87,6 +87,18 @@ spec:
                 name: moodji-secret
                 key: pushKit-secretkey
                 optional: true
+          - name: TX_CLOUD_BASE_SECRET_ID
+            valueFrom:
+              secretKeyRef:
+                name: moodji-secret
+                key: tx_cloud_base_secret_id
+                optional: true
+          - name: TX_CLOUD_BASE_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: moodji-secret
+                key: tx_cloud_base_secret_key
+                optional: true
         {{if .ImagePullPolicy}}imagePullPolicy: {{.ImagePullPolicy}}
         {{end}}ports:
         - containerPort: {{.Port}}
