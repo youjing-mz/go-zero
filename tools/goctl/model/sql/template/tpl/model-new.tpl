@@ -15,6 +15,13 @@ func (m *default{{.upperStartCamelObject}}Model) WithSession(session sqlx.Sessio
 	}
 }
 
+func (m *default{{.upperStartCamelObject}}Model) WithEventIdSession(session sqlx.Session, eventId string) *default{{.upperStartCamelObject}}Model {
+	return &default{{.upperStartCamelObject}}Model{
+		{{if .withCache}}CachedConn:m.CachedConn.WithSession(session){{else}}conn:sqlx.NewSqlConnFromSession(session){{end}},
+		table:      fmt.Sprintf("%s_%s", strings.ReplaceAll({{.upperStartCamelObject}}ModelTableStaticName, "`", ""), eventId,
+	}
+}
+
 func (m *default{{.upperStartCamelObject}}Model) Trans(ctx context.Context, fn func(ctx context.Context, session sqlx.Session) error) error {
 	return m.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 		return fn(ctx, session)
