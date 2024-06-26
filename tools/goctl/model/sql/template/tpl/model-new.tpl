@@ -1,5 +1,6 @@
 
 var {{.upperStartCamelObject}}ModelTableName = {{.table}}
+var {{.upperStartCamelObject}}SpecialTableNameMap = make(map[string]string)
 const {{.upperStartCamelObject}}ModelTableStaticName = {{.table}}
 func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn{{if .withCache}}, c cache.CacheConf, opts ...cache.Option{{end}}) *default{{.upperStartCamelObject}}Model {
 	return &default{{.upperStartCamelObject}}Model{
@@ -15,8 +16,8 @@ func (m *default{{.upperStartCamelObject}}Model) WithSession(session sqlx.Sessio
 	}
 }
 
-func (m *default{{.upperStartCamelObject}}Model) WithEventIdSession(session sqlx.Session, eventId string, specialTableNameMap map[string]string) *default{{.upperStartCamelObject}}Model {
-    var tableName, ok = specialTableNameMap[fmt.Sprintf("%s_%s", {{.upperStartCamelObject}}ModelTableStaticName, eventId)]
+func (m *default{{.upperStartCamelObject}}Model) WithEventIdSession(session sqlx.Session, eventId string) *default{{.upperStartCamelObject}}Model {
+    var tableName, ok = {{.upperStartCamelObject}}SpecialTableNameMap[fmt.Sprintf("%s_%s", {{.upperStartCamelObject}}ModelTableStaticName, eventId)]
 	if ok {
 		return &default{{.upperStartCamelObject}}Model{
         		{{if .withCache}}CachedConn:m.CachedConn.WithSession(session){{else}}conn:sqlx.NewSqlConnFromSession(session){{end}},
