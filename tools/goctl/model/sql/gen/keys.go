@@ -63,11 +63,9 @@ func genCacheKey(db, table stringx.String, in []*parser.Field) Key {
 	dbName, tableName := util.SafeString(db.Source()), util.SafeString(table.Source())
 	if len(dbName) > 0 {
 		varLeftJoin = append(varLeftJoin, "cache", dbName, tableName)
-		varRightJoin = append(varRightJoin, "cache", dbName, tableName)
 		keyLeftJoin = append(keyLeftJoin, dbName, tableName)
 	} else {
 		varLeftJoin = append(varLeftJoin, "cache", tableName)
-		varRightJoin = append(varRightJoin, "cache", tableName)
 		keyLeftJoin = append(keyLeftJoin, tableName)
 	}
 
@@ -88,8 +86,8 @@ func genCacheKey(db, table stringx.String, in []*parser.Field) Key {
 	varExpression = fmt.Sprintf(`%s = %s`, varLeft, varRight)
 
 	keyLeft = util.SafeString(keyLeftJoin.Camel().With("").Untitle())
-	keyRight = fmt.Sprintf(`fmt.Sprintf("%s%s", %s, %s)`, "%s", keyRightArgJoin.With(":").Source(), varLeft, keyRightJoin.With(", ").Source())
-	dataKeyRight = fmt.Sprintf(`fmt.Sprintf("%s%s", %s, %s)`, "%s", keyRightArgJoin.With(":").Source(), varLeft, dataRightJoin.With(", ").Source())
+	keyRight = fmt.Sprintf(`fmt.Sprintf("cache:%s:%s%v", %s, %s, %s)`, "%s", "%s", keyRightArgJoin.With(":").Source(), "strings.ReplaceAll(TransformString(m.table),\"`\",\"\")", varLeft, keyRightJoin.With(", ").Source())
+	dataKeyRight = fmt.Sprintf(`fmt.Sprintf("cache:%s:%s%v", %s, %s, %s)`, "%s", "%s", keyRightArgJoin.With(":").Source(), "strings.ReplaceAll(TransformString(m.table),\"`\",\"\")", varLeft, dataRightJoin.With(", ").Source())
 	keyExpression = fmt.Sprintf("%s := %s", keyLeft, keyRight)
 	dataKeyExpression = fmt.Sprintf("%s := %s", keyLeft, dataKeyRight)
 
