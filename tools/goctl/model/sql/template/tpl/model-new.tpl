@@ -25,7 +25,7 @@ func (m *default{{.upperStartCamelObject}}Model) WithEventIdSession(session sqlx
 	}
 	return &default{{.upperStartCamelObject}}Model{
 		{{if .withCache}}CachedConn:m.CachedConn.WithSession(session){{else}}conn:sqlx.NewSqlConnFromSession(session){{end}},
-		table:      fmt.Sprintf("%s_%s", strings.ReplaceAll({{.upperStartCamelObject}}ModelTableStaticName, "`", ""), eventId,
+		table:      fmt.Sprintf("%s_%s", strings.ReplaceAll({{.upperStartCamelObject}}ModelTableStaticName, "`", ""), eventId),
 	}
 }
 
