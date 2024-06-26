@@ -15,7 +15,15 @@ func (m *default{{.upperStartCamelObject}}Model) WithSession(session sqlx.Sessio
 	}
 }
 
-func (m *default{{.upperStartCamelObject}}Model) WithEventIdSession(session sqlx.Session, eventId string) *default{{.upperStartCamelObject}}Model {
+func (m *default{{.upperStartCamelObject}}Model) WithEventIdSession(session sqlx.Session, eventId string, specialTableNameMap map[string]string) *default{{.upperStartCamelObject}}Model {
+    var tableName, ok = specialTableNameMap[fmt.Sprintf("%s_%s", {{.upperStartCamelObject}}ModelTableStaticName, eventId)]
+	if ok {
+		return &default{{.upperStartCamelObject}}Model{
+        		{{if .withCache}}CachedConn:m.CachedConn.WithSession(session){{else}}conn:sqlx.NewSqlConnFromSession(session){{end}},
+        		table:      tableName,
+        }
+	}
+}
 	return &default{{.upperStartCamelObject}}Model{
 		{{if .withCache}}CachedConn:m.CachedConn.WithSession(session){{else}}conn:sqlx.NewSqlConnFromSession(session){{end}},
 		table:      fmt.Sprintf("%s_%s", strings.ReplaceAll({{.upperStartCamelObject}}ModelTableStaticName, "`", ""), eventId,
