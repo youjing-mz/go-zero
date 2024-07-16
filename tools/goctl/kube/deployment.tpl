@@ -17,10 +17,20 @@ spec:
         app: {{.Name}}
     spec:{{if .ServiceAccount}}
       serviceAccountName: {{.ServiceAccount}}{{end}}
+      initContainers:
+      - name: init-coredump
+        image: {{.Image}}
+        command: ['sh', '-c', "sysctl -w kernel.core_pattern=/tmp/cores/core.%e.%p.%t"]
+        securityContext:
+            privileged: true
       containers:
       - name: {{.Name}}
         image: {{.Image}}
+        securityContext:
+            privileged: true
         env:
+          - name: GOTRACEBACK
+            value: crash
           - name: MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -120,11 +130,16 @@ spec:
             cpu: {{.LimitCpu}}m
             memory: {{.LimitMem}}Mi
         volumeMounts:
+        - mountPath: /tmp/cores
+          name: core-path
         - name: timezone
           mountPath: /etc/localtime
       {{if .Secret}}imagePullSecrets:
       - name: {{.Secret}}
       {{end}}volumes:
+        - name: core-path
+          hostPath:
+            path: /home/ubuntu/crash-info
         - name: timezone
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
