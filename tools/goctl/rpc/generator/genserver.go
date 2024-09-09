@@ -18,7 +18,8 @@ import (
 const functionTemplate = `
 {{if .hasComment}}{{.comment}}{{end}}
 func (s *{{.server}}Server) {{.method}} ({{if .notStream}}ctx context.Context,{{if .hasReq}} in {{.request}}{{end}}{{else}}{{if .hasReq}} in {{.request}},{{end}}stream {{.streamBody}}{{end}}) ({{if .notStream}}{{.response}},{{end}}error) {
-	l := {{.logicPkg}}.New{{.logicName}}({{if .notStream}}ctx,{{else}}stream.Context(),{{end}}s.svcCtx)
+	l := {{.logicPkg}}.New{{.logicName}}({{if .notStream}}ctx,{{else}}stream.Context(),{{end}}s.svcCtx,rpcLog.RpcLogger{})
+	l.RpcLogger.SetFiled(map[string]interface{}{"path": {{.serverFullMethod}},"uid": in.Uid})
 	return l.{{.method}}({{if .hasReq}}in{{if .stream}} ,stream{{end}}{{else}}{{if .stream}}stream{{end}}{{end}})
 }
 `
@@ -107,12 +108,13 @@ func (g *Generator) genServerGroup(ctx DirContext, proto parser.Proto, cfg *conf
 func (g *Generator) genServerInCompatibility(ctx DirContext, proto parser.Proto,
 	cfg *conf.Config, c *ZRpcContext) error {
 	dir := ctx.GetServer()
+	rpcLogImport := fmt.Sprintf(`"%v"`, "github.com/motionz-tech/flowz-srv/common/rpcLogUtils")
 	logicImport := fmt.Sprintf(`"%v"`, ctx.GetLogic().Package)
 	svcImport := fmt.Sprintf(`"%v"`, ctx.GetSvc().Package)
 	pbImport := fmt.Sprintf(`"%v"`, ctx.GetPb().Package)
 
 	imports := collection.NewSet()
-	imports.AddStr(logicImport, svcImport, pbImport)
+	imports.AddStr(rpcLogImport, logicImport, svcImport, pbImport)
 
 	head := util.GetHead(proto.Name)
 	service := proto.Service[0]
@@ -176,18 +178,19 @@ func (g *Generator) genFunctions(goPackage string, service parser.Service, multi
 		streamServer := fmt.Sprintf("%s.%s_%s%s", goPackage, parser.CamelCase(service.Name),
 			parser.CamelCase(rpc.Name), "Server")
 		buffer, err := util.With("func").Parse(text).Execute(map[string]any{
-			"server":     stringx.From(service.Name).ToCamel(),
-			"logicName":  logicName,
-			"method":     parser.CamelCase(rpc.Name),
-			"request":    fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.RequestType)),
-			"response":   fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.ReturnsType)),
-			"hasComment": len(comment) > 0,
-			"comment":    comment,
-			"hasReq":     !rpc.StreamsRequest,
-			"stream":     rpc.StreamsRequest || rpc.StreamsReturns,
-			"notStream":  !rpc.StreamsRequest && !rpc.StreamsReturns,
-			"streamBody": streamServer,
-			"logicPkg":   logicPkg,
+			"server":           stringx.From(service.Name).ToCamel(),
+			"logicName":        logicName,
+			"method":           parser.CamelCase(rpc.Name),
+			"serverFullMethod": fmt.Sprintf("%s.%s_%s_%s", service.Name, parser.CamelCase(service.Name), parser.CamelCase(rpc.Name), "FullMethodName"),
+			"request":          fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.RequestType)),
+			"response":         fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.ReturnsType)),
+			"hasComment":       len(comment) > 0,
+			"comment":          comment,
+			"hasReq":           !rpc.StreamsRequest,
+			"stream":           rpc.StreamsRequest || rpc.StreamsReturns,
+			"notStream":        !rpc.StreamsRequest && !rpc.StreamsReturns,
+			"streamBody":       streamServer,
+			"logicPkg":         logicPkg,
 		})
 		if err != nil {
 			return nil, err
