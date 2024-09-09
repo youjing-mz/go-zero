@@ -54,6 +54,7 @@ func (g *Generator) genLogicInCompatibility(ctx DirContext, proto parser.Proto,
 		}
 
 		imports := collection.NewSet()
+		imports.AddStr(fmt.Sprintf(`"%v"`, "github.com/motionz-tech/flowz-srv/common/rpcLogUtils"))
 		imports.AddStr(fmt.Sprintf(`"%v"`, ctx.GetSvc().Package))
 		imports.AddStr(fmt.Sprintf(`"%v"`, ctx.GetPb().Package))
 		text, err := pathx.LoadTemplate(category, logicTemplateFileFile, logicTemplate)
@@ -107,6 +108,7 @@ func (g *Generator) genLogicGroup(ctx DirContext, proto parser.Proto, cfg *conf.
 			}
 
 			imports := collection.NewSet()
+			imports.AddStr(fmt.Sprintf(`"%v"`, "github.com/motionz-tech/flowz-srv/common/rpcLogUtils"))
 			imports.AddStr(fmt.Sprintf(`"%v"`, ctx.GetSvc().Package))
 			imports.AddStr(fmt.Sprintf(`"%v"`, ctx.GetPb().Package))
 			text, err := pathx.LoadTemplate(category, logicTemplateFileFile, logicTemplate)
