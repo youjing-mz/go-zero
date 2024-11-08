@@ -42,7 +42,7 @@ func (l *{{.logic}}) {{.function}}({{.request}}) {{.responseType}} {
 	}
 
 	var rsp types.{{.typeName}}Rsp
-	err = copier.Copy(&rsp, rpcRsp)
+	err = copier.CopyWithOption(&rsp, rpcRsp, copier.Option{DeepCopy: true})
 	if err != nil {
 		return nil, errors.Wrapf(err, "copier.Copy rsp failed")
 	}
