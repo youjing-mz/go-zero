@@ -18,7 +18,7 @@ import (
 const functionTemplate = `
 {{if .hasComment}}{{.comment}}{{end}}
 func (s *{{.server}}Server) {{.method}} ({{if .notStream}}ctx context.Context,{{if .hasReq}} in {{.request}}{{end}}{{else}}{{if .hasReq}} in {{.request}},{{end}}stream {{.streamBody}}{{end}}) ({{if .notStream}}{{.response}},{{end}}error) {
-	l := {{.logicPkg}}.New{{.logicName}}({{if .notStream}}ctx,{{else}}stream.Context(),{{end}}s.svcCtx,rpcLog.NewRpcLogger(map[string]interface{}{"path": {{.serverFullMethod}},"uid": in.Uid}))
+	l := {{.logicPkg}}.New{{.logicName}}({{if .notStream}}ctx,{{else}}stream.Context(),{{end}}s.svcCtx,rpcLog.NewRpcLogger(map[string]interface{}{"path": {{.serverFullMethod}},"uid": ctxdata.GetUidFromCtx(ctx), "ssid": ctxdata.GetSsidFromCtx(ctx)}))
 	return l.{{.method}}({{if .hasReq}}in{{if .stream}} ,stream{{end}}{{else}}{{if .stream}}stream{{end}}{{end}})
 }
 `
@@ -107,13 +107,14 @@ func (g *Generator) genServerGroup(ctx DirContext, proto parser.Proto, cfg *conf
 func (g *Generator) genServerInCompatibility(ctx DirContext, proto parser.Proto,
 	cfg *conf.Config, c *ZRpcContext) error {
 	dir := ctx.GetServer()
+	extendImports := fmt.Sprintf(`"%v"`, "github.com/motionz-tech/flowz-srv/common/ctxdata")
 	rpcLogImport := fmt.Sprintf(`"%v"`, "github.com/motionz-tech/flowz-srv/common/rpcLogUtils")
 	logicImport := fmt.Sprintf(`"%v"`, ctx.GetLogic().Package)
 	svcImport := fmt.Sprintf(`"%v"`, ctx.GetSvc().Package)
 	pbImport := fmt.Sprintf(`"%v"`, ctx.GetPb().Package)
 
 	imports := collection.NewSet()
-	imports.AddStr(rpcLogImport, logicImport, svcImport, pbImport)
+	imports.AddStr(extendImports, rpcLogImport, logicImport, svcImport, pbImport)
 
 	head := util.GetHead(proto.Name)
 	service := proto.Service[0]

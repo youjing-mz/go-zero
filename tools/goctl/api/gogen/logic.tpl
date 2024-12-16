@@ -2,7 +2,6 @@ package {{.pkgName}}
 
 import (
 	"github.com/jinzhu/copier"
-	"github.com/motionz-tech/flowz-srv/common/ctxdata"
 	{{.imports}}
 	"github.com/pkg/errors"
 	"github.com/motionz-tech/flowz-srv/service/{{.serviceName}}/rpc/{{.serviceName}}"
@@ -23,18 +22,10 @@ func New{{.logic}}(ctx context.Context, svcCtx *svc.ServiceContext) *{{.logic}} 
 }
 
 func (l *{{.logic}}) {{.function}}({{.request}}) {{.responseType}} {
-	userId, err := ctxdata.GetUidFromCtx(l.ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var rpcReq {{.serviceName}}.{{.typeName}}Req
-	err = copier.Copy(&rpcReq, req)
-	if err != nil {
+	if err := copier.Copy(&rpcReq, req); err != nil {
 		return nil, errors.Wrapf(err, "copier.Copy req failed")
 	}
-
-	rpcReq.Uid = userId
 
 	rpcRsp, err := l.svcCtx.{{.upperStartCamelServiceName}}Rpc.{{.typeName}}(l.ctx, &rpcReq)
 	if err != nil {
