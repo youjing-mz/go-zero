@@ -17,5 +17,10 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, dat
 	if affected != 1 {
 		return ErrNoRowAffected
 	}
+	{{if .withCache}}
+	var allKeys []string
+    allKeys = append(allKeys, {{.keyValues}})
+	DelayDelKey(allKeys, m.CachedConn)
+    {{end}}
 	return nil
 }
