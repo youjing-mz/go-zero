@@ -134,6 +134,15 @@ spec:
           name: core-path
         - name: timezone
           mountPath: /etc/localtime
+        - name: kubeconfig-dev
+          mountPath: /app/kubeconfig-dev
+          readOnly: true
+        - name: kubeconfig-pre
+          mountPath: /app/kubeconfig-pre
+          readOnly: true
+        - name: kubeconfig-prod
+          mountPath: /app/kubeconfig-prod
+          readOnly: true
       {{if .Secret}}imagePullSecrets:
       - name: {{.Secret}}
       {{end}}volumes:
@@ -143,6 +152,15 @@ spec:
         - name: timezone
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: kubeconfig-dev
+          secret:
+            secretName: kubeconfig-dev
+        - name: kubeconfig-pre
+          secret:
+            secretName: kubeconfig-pre
+        - name: kubeconfig-prod
+          secret:
+            secretName: kubeconfig-prod
 
 ---
 
