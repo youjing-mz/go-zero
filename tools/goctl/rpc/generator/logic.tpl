@@ -5,6 +5,8 @@ import (
 
 	{{.imports}}
 
+	"github.com/motionz-tech/flowz-srv/common/txlogger"
+
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -18,7 +20,7 @@ func New{{.logicName}}(ctx context.Context,svcCtx *svc.ServiceContext) *{{.logic
 	return &{{.logicName}}{
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
+		Logger: txlogger.NewContextLogx(ctx),
 	}
 }
 {{.functions}}
