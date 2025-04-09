@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/copier"
 	{{.imports}}
 	"github.com/pkg/errors"
-	"github.com/motionz-tech/flowz-srv/common/txlogger"
+	"github.com/motionz-tech/flowz-srv/common/tencentcloud"
 	"github.com/motionz-tech/flowz-srv/service/{{.serviceName}}/rpc/{{.serviceName}}"
 )
 
@@ -16,7 +16,7 @@ type {{.logic}} struct {
 
 func New{{.logic}}(ctx context.Context, svcCtx *svc.ServiceContext) *{{.logic}} {
 	return &{{.logic}}{
-		Logger: txlogger.NewContextLogx(ctx),
+		Logger: tencentcloud.NewContextLogx(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
