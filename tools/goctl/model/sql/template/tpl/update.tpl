@@ -8,15 +8,15 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, dat
 	}, {{.keyValues}}){{else}}query := fmt.Sprintf("update %s set %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table, {{.lowerStartCamelObject}}RowsWithPlaceHolder)
     ret,err := m.conn.ExecCtx(ctx, query, {{.expressionValues}}){{end}}
 	if err != nil {
-		return HandleMySQLError(err)
+		return mysqlUtils.HandleMySQLError(err)
 	}
 	if _, err = ret.RowsAffected(); err != nil {
-		return HandleMySQLError(err)
+		return mysqlUtils.HandleMySQLError(err)
 	}
 	{{if .withCache}}
 	var allKeys []string
     allKeys = append(allKeys, {{.keyValues}})
-	DelayDelKey(allKeys, m.CachedConn)
+	mysqlUtils.DelayDelKey(allKeys, m.CachedConn)
     {{end}}
 	return nil
 }

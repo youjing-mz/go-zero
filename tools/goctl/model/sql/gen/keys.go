@@ -86,8 +86,8 @@ func genCacheKey(db, table stringx.String, in []*parser.Field) Key {
 	varExpression = fmt.Sprintf(`%s = %s`, varLeft, varRight)
 
 	keyLeft = util.SafeString(keyLeftJoin.Camel().With("").Untitle())
-	keyRight = fmt.Sprintf(`fmt.Sprintf("cache:%s:%s%v", %s, %s, %s)`, "%s", "%s", keyRightArgJoin.With(":").Source(), "strings.ReplaceAll(TransformString(m.table),\"`\",\"\")", varLeft, keyRightJoin.With(", ").Source())
-	dataKeyRight = fmt.Sprintf(`fmt.Sprintf("cache:%s:%s%v", %s, %s, %s)`, "%s", "%s", keyRightArgJoin.With(":").Source(), "strings.ReplaceAll(TransformString(m.table),\"`\",\"\")", varLeft, dataRightJoin.With(", ").Source())
+	keyRight = fmt.Sprintf(`fmt.Sprintf("cache:%s:%s%v", %s, %s, %s)`, "%s", "%s", keyRightArgJoin.With(":").Source(), "strings.ReplaceAll(mysqlUtils.TransformString(m.table),\"`\",\"\")", varLeft, keyRightJoin.With(", ").Source())
+	dataKeyRight = fmt.Sprintf(`fmt.Sprintf("cache:%s:%s%v", %s, %s, %s)`, "%s", "%s", keyRightArgJoin.With(":").Source(), "strings.ReplaceAll(mysqlUtils.TransformString(m.table),\"`\",\"\")", varLeft, dataRightJoin.With(", ").Source())
 	keyExpression = fmt.Sprintf("%s := %s", keyLeft, keyRight)
 	dataKeyExpression = fmt.Sprintf("%s := %s", keyLeft, dataKeyRight)
 

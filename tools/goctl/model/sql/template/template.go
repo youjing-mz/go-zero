@@ -118,11 +118,6 @@ var Field string
 //go:embed tpl/err.tpl
 var Error string
 
-// Util defines an error template
-//
-//go:embed tpl/util.tpl
-var Util string
-
 // Delete defines a delete template
 //
 //go:embed tpl/delete.tpl
