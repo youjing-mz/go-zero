@@ -6,11 +6,11 @@ func (m *default{{.upperStartCamelObject}}Model) Insert(ctx context.Context, dat
 	}, {{.keyValues}}){{else}}query := fmt.Sprintf("insert into %s (%s) values ({{.expression}})", m.table, {{.lowerStartCamelObject}}RowsExpectAutoSet)
     ret,err := m.conn.ExecCtx(ctx, query, {{.expressionValues}}){{end}}
 	if err != nil {
-		return err
+		return HandleMySQLError(err)
 	}
 	affected, err := ret.RowsAffected()
 	if err != nil {
-		return err
+		return HandleMySQLError(err)
 	}
 	if affected != 1 {
 		return ErrNoRowAffected
@@ -62,11 +62,11 @@ func (m *default{{.upperStartCamelObject}}Model) InsertBatch(ctx context.Context
 		return conn.ExecCtx(ctx, query, params...)
 	},allKeys...)
 	if err != nil {
-		return err
+		return HandleMySQLError(err)
 	}
 	affected, err := ret.RowsAffected()
 	if err != nil {
-		return err
+		return HandleMySQLError(err)
 	}
 	if int(affected) != dataCount {
 		return ErrNoRowAffected

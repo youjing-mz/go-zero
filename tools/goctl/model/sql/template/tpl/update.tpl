@@ -8,14 +8,10 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, dat
 	}, {{.keyValues}}){{else}}query := fmt.Sprintf("update %s set %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table, {{.lowerStartCamelObject}}RowsWithPlaceHolder)
     ret,err := m.conn.ExecCtx(ctx, query, {{.expressionValues}}){{end}}
 	if err != nil {
-		return err
+		return HandleMySQLError(err)
 	}
-	affected, err := ret.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affected != 1 {
-		return ErrNoRowAffected
+	if _, err = ret.RowsAffected(); err != nil {
+		return HandleMySQLError(err)
 	}
 	{{if .withCache}}
 	var allKeys []string

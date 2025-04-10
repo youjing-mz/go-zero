@@ -203,6 +203,25 @@ func (g *defaultGenerator) createFile(modelList map[string]*codeTuple) error {
 		return err
 	}
 
+	// generate util file
+	utilFilename, err := format.FileNamingFormat(g.cfg.NamingFormat, "util")
+	if err != nil {
+		return err
+	}
+
+	filename = filepath.Join(dirAbs, utilFilename+".go")
+	text, err = pathx.LoadTemplate(category, utilTemplateFile, template.Util)
+	if err != nil {
+		return err
+	}
+
+	err = util.With("util").Parse(text).SaveTo(map[string]any{
+		"pkg": g.pkg,
+	}, filename, false)
+	if err != nil {
+		return err
+	}
+
 	g.Success("Done.")
 	return nil
 }
