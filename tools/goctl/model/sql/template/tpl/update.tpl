@@ -10,9 +10,13 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, dat
 	if err != nil {
 		return mysqlUtils.HandleMySQLError(err)
 	}
-	if _, err = ret.RowsAffected(); err != nil {
-		return mysqlUtils.HandleMySQLError(err)
-	}
+	rowAffected, err := ret.RowsAffected();
+    if err != nil {
+        return mysqlUtils.HandleMySQLError(err)
+    }
+    if rowAffected != 1 {
+        return mysqlUtils.ErrNoRowAffected
+    }
 	{{if .withCache}}
 	var allKeys []string
     allKeys = append(allKeys, {{.keyValues}})
