@@ -4,7 +4,7 @@ func (m *default{{.upperStartCamelObject}}Model) Insert(ctx context.Context, dat
 		query := fmt.Sprintf("insert into %s (%s) values ({{.expression}})", m.table, {{.lowerStartCamelObject}}RowsExpectAutoSet)
 		return conn.ExecCtx(ctx, query, {{.expressionValues}})
 	}, {{.keyValues}}){{else}}query := fmt.Sprintf("insert into %s (%s) values ({{.expression}})", m.table, {{.lowerStartCamelObject}}RowsExpectAutoSet)
-    ret,err := m.conn.ExecCtx(ctx, query, {{.expressionValues}}){{end}}
+    ret, err := m.conn.ExecCtx(ctx, query, {{.expressionValues}}){{end}}
 	if err != nil {
 		return mysqlUtils.HandleMySQLError(err)
 	}
@@ -16,6 +16,26 @@ func (m *default{{.upperStartCamelObject}}Model) Insert(ctx context.Context, dat
 		return mysqlUtils.ErrNoRowAffected
 	}
 	return nil
+}
+
+func (m *default{{.upperStartCamelObject}}Model) InsertOne(ctx context.Context, data *{{.upperStartCamelObject}}) (sql.Result, error) {
+	{{if .withCache}}{{.keys}}
+    ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("insert into %s (%s) values ({{.expression}})", m.table, {{.lowerStartCamelObject}}RowsExpectAutoSet)
+		return conn.ExecCtx(ctx, query, {{.expressionValues}})
+	}, {{.keyValues}}){{else}}query := fmt.Sprintf("insert into %s (%s) values ({{.expression}})", m.table, {{.lowerStartCamelObject}}RowsExpectAutoSet)
+    ret, err := m.conn.ExecCtx(ctx, query, {{.expressionValues}}){{end}}
+	if err != nil {
+		return nil, mysqlUtils.HandleMySQLError(err)
+	}
+	affected, err := ret.RowsAffected()
+	if err != nil {
+		return nil, mysqlUtils.HandleMySQLError(err)
+	}
+	if affected != 1 {
+		return nil, mysqlUtils.ErrNoRowAffected
+	}
+	return ret, nil
 }
 
 func (m *default{{.upperStartCamelObject}}Model) generateInsertBatchSQLStatements(count int) string {
