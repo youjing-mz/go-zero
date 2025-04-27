@@ -42,8 +42,8 @@ func DelKey(conn sqlc.CachedConn, key []string) {
 	}
 }
 
-// mysqlUtils.HandleMySQLError converts MySQL errors to application error types
-func mysqlUtils.HandleMySQLError(err error) error {
+// dbutils.HandleMySQLError converts MySQL errors to application error types
+func dbutils.HandleMySQLError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -65,8 +65,8 @@ func mysqlUtils.HandleMySQLError(err error) error {
 	}
 
 	// Handle special application errors
-	if errors.Is(err, mysqlUtils.ErrNoRowAffected) {
-		return mysqlUtils.ErrNoRowAffected
+	if errors.Is(err, dbutils.ErrNoRowAffected) {
+		return dbutils.ErrNoRowAffected
 	}
 
 	// Return the original error if we can't map it

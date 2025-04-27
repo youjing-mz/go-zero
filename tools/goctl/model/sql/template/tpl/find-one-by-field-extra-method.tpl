@@ -1,5 +1,5 @@
 func (m *default{{.upperStartCamelObject}}Model) formatPrimary(primary any) string {
-	return fmt.Sprintf("cache:%s:%s%v", strings.ReplaceAll(mysqlUtils.TransformString(m.table), "`", ""), {{.primaryKeyLeft}}, primary)
+	return fmt.Sprintf("cache:%s:%s%v", strings.ReplaceAll(dbutils.TransformString(m.table), "`", ""), {{.primaryKeyLeft}}, primary)
 }
 
 func (m *default{{.upperStartCamelObject}}Model) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {

@@ -1,7 +1,7 @@
 func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) error {
 	{{if .withCache}}{{if .containsIndexCache}}data, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
 	if err != nil {
-		return mysqlUtils.HandleMySQLError(err)
+		return dbutils.HandleMySQLError(err)
 	}
 
 {{end}}	{{.keys}}
@@ -10,7 +10,7 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
 		return conn.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}})
 	}, {{.keyValues}}){{else}}query := fmt.Sprintf("delete from %s where {{.originalPrimaryKey}} = {{if .postgreSql}}$1{{else}}?{{end}}", m.table)
 		_,err:=m.conn.ExecCtx(ctx, query, {{.lowerStartCamelPrimaryKey}}){{end}}
-	return mysqlUtils.HandleMySQLError(err)
+	return dbutils.HandleMySQLError(err)
 }
 
 func (m *default{{.upperStartCamelObject}}Model) DeleteAll(ctx context.Context) error {
@@ -19,7 +19,7 @@ func (m *default{{.upperStartCamelObject}}Model) DeleteAll(ctx context.Context) 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE 1", m.table)
 	var queryParams []interface{}
 	if err := m.CachedConn.QueryRowsNoCacheCtx(ctx, &records, query, queryParams...); err != nil {
-	    return mysqlUtils.HandleMySQLError(err)
+	    return dbutils.HandleMySQLError(err)
 	}
 	for _, record := range records {
 		if err := m.Delete(ctx, record.{{.upperStartCamelPrimaryKey}}); err != nil {
@@ -70,5 +70,5 @@ func (m *default{{.upperStartCamelObject}}Model) DeleteBatch(ctx context.Context
 		return conn.ExecCtx(ctx, query, args...)
 	}, allKeys...){{else}}query := fmt.Sprintf("delete from %s where {{.originalPrimaryKey}} IN (%s)", m.table, generateDeleteBatchSQLStatements(ids))
 		_,err:=m.conn.ExecCtx(ctx, query, args...){{end}}
-	return mysqlUtils.HandleMySQLError(err)
+	return dbutils.HandleMySQLError(err)
 }

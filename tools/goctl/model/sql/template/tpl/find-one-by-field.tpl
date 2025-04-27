@@ -8,13 +8,13 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 		}
 		return resp.{{.upperStartCamelPrimaryKey}}, nil
 	}, m.queryPrimary); err != nil {
-        return nil, mysqlUtils.HandleMySQLError(err)
+        return nil, dbutils.HandleMySQLError(err)
     }
     return &resp, nil
 }{{else}}var resp {{.upperStartCamelObject}}
 	query := fmt.Sprintf("select %s from %s where {{.originalField}} limit 1", {{.lowerStartCamelObject}}Rows, m.table )
 	if err := m.conn.QueryRowCtx(ctx, &resp, query, {{.lowerStartCamelField}}); err != nil {
-        return nil, mysqlUtils.HandleMySQLError(err)
+        return nil, dbutils.HandleMySQLError(err)
 	}
 	return resp, nil
 }{{end}}

@@ -2,7 +2,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	mysqlUtils "github.com/motionz-tech/flowz-srv/common/mysqlUtils"
+	dbutils "github.com/motionz-tech/flowz-srv/common/dbutils"
 	"strings"
 	{{if .time}}"time"{{end}}
 
