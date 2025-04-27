@@ -15,6 +15,7 @@ type (
 	// and implement the added methods in custom{{.upperStartCamelObject}}Model.
 	{{.upperStartCamelObject}}Model interface {
 		{{.lowerStartCamelObject}}Model
+		WithSession(session sqlx.Session) {{.upperStartCamelObject}}Model
 	}
 
 	custom{{.upperStartCamelObject}}Model struct {
@@ -28,3 +29,13 @@ func New{{.upperStartCamelObject}}Model(conn sqlx.SqlConn{{if .withCache}}, c ca
 		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(conn{{if .withCache}}, c, opts...{{end}}),
 	}
 }
+
+func (m *custom{{.upperStartCamelObject}}Model) WithSession(session sqlx.Session) {{.upperStartCamelObject}}Model {
+	return &custom{{.upperStartCamelObject}}Model{
+		default{{.upperStartCamelObject}}Model: &default{{.upperStartCamelObject}}Model{
+			{{if .withCache}}CachedConn:m.CachedConn.WithSession(session){{else}}conn:sqlx.NewSqlConnFromSession(session){{end}},
+			table:      {{.upperStartCamelObject}}ModelTableName,
+		},
+	}
+}
+

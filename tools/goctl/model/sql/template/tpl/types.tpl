@@ -1,9 +1,6 @@
 type (
 	{{.lowerStartCamelObject}}Model interface{
 		{{.method}}
-		Trans(ctx context.Context, fn func(context context.Context, session sqlx.Session) error) error
-		WithSession(session sqlx.Session) *default{{.upperStartCamelObject}}Model
-		WithEventIdSession(session sqlx.Session, eventId string) *default{{.upperStartCamelObject}}Model
 	}
 
 	default{{.upperStartCamelObject}}Model struct {
