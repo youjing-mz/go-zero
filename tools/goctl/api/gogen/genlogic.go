@@ -12,6 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 	"github.com/zeromicro/go-zero/tools/goctl/vars"
 )
 
@@ -21,7 +22,7 @@ var logicTemplate string
 func genLogic(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec) error {
 	for _, g := range api.Service.Groups {
 		for _, r := range g.Routes {
-			err := genLogicByRoute(dir, rootPkg, cfg, g, r)
+			err := genLogicByRoute(dir, rootPkg, cfg, g, r, api)
 			if err != nil {
 				return err
 			}
@@ -30,7 +31,18 @@ func genLogic(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec) error 
 	return nil
 }
 
-func genLogicByRoute(dir, rootPkg string, cfg *config.Config, group spec.Group, route spec.Route) error {
+func extractTypeName(input string) string {
+	parts := strings.Split(input, ".")
+
+	if len(parts) == 2 && strings.HasSuffix(parts[1], "Req") {
+		result := strings.TrimSuffix(parts[1], "Req")
+		return result
+	}
+
+	return ""
+}
+
+func genLogicByRoute(dir, rootPkg string, cfg *config.Config, group spec.Group, route spec.Route, api *spec.ApiSpec) error {
 	logic := getLogicName(route)
 	goFile, err := format.FileNamingFormat(cfg.NamingFormat, logic)
 	if err != nil {
@@ -43,17 +55,20 @@ func genLogicByRoute(dir, rootPkg string, cfg *config.Config, group spec.Group, 
 	var requestString string
 	if len(route.ResponseTypeName()) > 0 {
 		resp := responseGoTypeName(route, typesPacket)
-		responseString = "(resp " + resp + ", err error)"
-		returnString = "return"
+		responseString = "(" + resp + ", error)"
+		returnString = "return &rsp, nil"
 	} else {
 		responseString = "error"
 		returnString = "return nil"
 	}
+	typeName := ""
 	if len(route.RequestTypeName()) > 0 {
 		requestString = "req *" + requestGoTypeName(route, typesPacket)
+		typeName = extractTypeName(requestGoTypeName(route, typesPacket))
 	}
 
 	subDir := getLogicFolderPath(group, route)
+	xServiceName := stringx.From(api.Service.Name)
 	return genFile(fileGenConfig{
 		dir:             dir,
 		subdir:          subDir,
@@ -63,13 +78,16 @@ func genLogicByRoute(dir, rootPkg string, cfg *config.Config, group spec.Group, 
 		templateFile:    logicTemplateFile,
 		builtinTemplate: logicTemplate,
 		data: map[string]string{
-			"pkgName":      subDir[strings.LastIndex(subDir, "/")+1:],
-			"imports":      imports,
-			"logic":        strings.Title(logic),
-			"function":     strings.Title(strings.TrimSuffix(logic, "Logic")),
-			"responseType": responseString,
-			"returnString": returnString,
-			"request":      requestString,
+			"serviceName":                api.Service.Name,
+			"typeName":                   typeName,
+			"upperStartCamelServiceName": xServiceName.ToCamel(),
+			"pkgName":                    subDir[strings.LastIndex(subDir, "/")+1:],
+			"imports":                    imports,
+			"logic":                      strings.Title(logic),
+			"function":                   strings.Title(strings.TrimSuffix(logic, "Logic")),
+			"responseType":               responseString,
+			"returnString":               returnString,
+			"request":                    requestString,
 		},
 	})
 }

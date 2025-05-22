@@ -68,7 +68,7 @@ func CreateApiTemplate(_ *cobra.Command, _ []string) error {
 	if err := t.Execute(fp, map[string]string{
 		"gitUser":     getGitName(),
 		"gitEmail":    getGitEmail(),
-		"serviceName": baseName + "-api",
+		"serviceName": baseName,
 	}); err != nil {
 		return err
 	}
