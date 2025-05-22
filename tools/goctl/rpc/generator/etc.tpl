@@ -1,6 +1,8 @@
-Name: {{.serviceName}}.rpc
-ListenOn: 0.0.0.0:8080
-Etcd:
-  Hosts:
-  - 127.0.0.1:2379
-  Key: {{.serviceName}}.rpc
+Name: {{.serviceName}}-rpc
+ListenOn: 0.0.0.0:${{"{"}}{{.serviceName}}-rpc-port{{"}"}}
+Mode: ${env-mode}
+
+Log:
+  ServiceName: {{.serviceName}}-rpc
+  Level: ${log-level}
+  

@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/template"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 )
 
 func genNew(table Table, withCache, postgreSql bool) (string, error) {
@@ -25,7 +26,10 @@ func genNew(table Table, withCache, postgreSql bool) (string, error) {
 			"table":                 t,
 			"withCache":             withCache,
 			"upperStartCamelObject": table.Name.ToCamel(),
-			"data":                  table,
+			"upperStartCamelPrimaryKey": util.EscapeGolangKeyword(
+				stringx.From(table.PrimaryKey.Name.ToCamel()).Title(),
+			),
+			"data": table,
 		})
 	if err != nil {
 		return "", err
